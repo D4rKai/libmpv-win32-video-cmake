@@ -3,6 +3,9 @@ defaults:
   run:
     shell: bash
 
+# atlas-af1: the 20241021 toolchain (LLVM release/19.x, mingw-w64, ... pinned
+# to their 2024-10-21 commits), only for x86_64 and aarch64.
+
 on:
   workflow_dispatch:
     inputs:
@@ -10,11 +13,27 @@ on:
         description: 'Run custom command before building'
         required: false
         type: string
+      cache_prefix:
+        description: 'Cache key prefix (must match the one given to mpv clang)'
+        required: false
+        default: 'af1'
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  # CMake 4 in the build image refuses cmake_minimum_required(< 3.5) of the
+  # 2024 sources; this keeps them building unchanged.
+  CMAKE_POLICY_VERSION_MINIMUM: '3.5'
+  # rust 1.86 + crates resolved today: pick crate versions that still build with it.
+  CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS: fallback
 
 jobs:
   build_llvm:
     name: Building LLVM and Clang
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     strategy:
       fail-fast: false
     container:
@@ -31,56 +50,31 @@ jobs:
 
       - uses: actions/checkout@main
         with:
-          ref: master
+          ref: ${{ github.sha }}
 
       - name: Loading clang root
         id: clang_root_cache
         uses: actions/cache/restore@main
         with:
           path: clang_root
-          key: ${{ secrets.CACHE_VERSION }}-clang_root-${{ github.run_id }}
-          restore-keys: ${{ secrets.CACHE_VERSION }}-clang_root
+          key: ${{ inputs.cache_prefix }}-clang_root-${{ github.run_id }}
+          restore-keys: ${{ inputs.cache_prefix }}-clang_root
 
       - name: Loading x86_64 toolchain
         id: x86_64_cache
         uses: actions/cache/restore@main
         with:
           path: build_x86_64
-          key: ${{ secrets.CACHE_VERSION }}-clang-x86_64_toolchain-${{ github.run_id }}
-          restore-keys: ${{ secrets.CACHE_VERSION }}-clang-x86_64_toolchain
-
-      - name: Loading x86_64_v3 toolchain
-        id: x86_64_v3_cache
-        uses: actions/cache/restore@main
-        with:
-          path: build_x86_64_v3
-          key: ${{ secrets.CACHE_VERSION }}-clang-x86_64_v3_toolchain-${{ github.run_id }}
-          restore-keys: ${{ secrets.CACHE_VERSION }}-clang-x86_64_v3_toolchain
-
-      - name: Loading i686 toolchain
-        id: i686_cache
-        uses: actions/cache/restore@main
-        with:
-          path: build_i686
-          key: ${{ secrets.CACHE_VERSION }}-clang-i686_toolchain-${{ github.run_id }}
-          restore-keys: ${{ secrets.CACHE_VERSION }}-clang-i686_toolchain
+          key: ${{ inputs.cache_prefix }}-clang-x86_64_toolchain-${{ github.run_id }}
+          restore-keys: ${{ inputs.cache_prefix }}-clang-x86_64_toolchain
 
       - name: Loading aarch64 toolchain
         id: aarch64_cache
         uses: actions/cache/restore@main
         with:
           path: build_aarch64
-          key: ${{ secrets.CACHE_VERSION }}-clang-aarch64_toolchain-${{ github.run_id }}
-          restore-keys: ${{ secrets.CACHE_VERSION }}-clang-aarch64_toolchain
-
-      - name: Loading repository cache
-        id: repository_cache
-        if: false
-        uses: actions/cache/restore@main
-        with:
-          path: src_packages
-          key: ${{ secrets.CACHE_VERSION }}-repository-${{ github.run_id }}
-          restore-keys: ${{ secrets.CACHE_VERSION }}-repository
+          key: ${{ inputs.cache_prefix }}-clang-aarch64_toolchain-${{ github.run_id }}
+          restore-keys: ${{ inputs.cache_prefix }}-clang-aarch64_toolchain
 
       - name: Running custom command
         if: ${{ github.event.inputs.command != '' }}
@@ -93,25 +87,13 @@ jobs:
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64/x86_64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64 -S $PWD
           ninja -C build_x86_64 llvm
           ninja -C build_x86_64 rustup
-          ninja -C build_x86_64 cargo-clean
+          ninja -C build_x86_64 cargo-clean || true
 
       - name: Building x86_64 toolchain
         if: ${{ steps.x86_64_cache.outputs.cache-matched-key == '' }}
         run: |
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64/x86_64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64 -S $PWD
           ninja -C build_x86_64 llvm-clang
-
-      - name: Building x86_64-v3 toolchain
-        if: ${{ steps.x86_64_v3_cache.outputs.cache-matched-key == '' }}
-        run: |
-          cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DGCC_ARCH=x86-64-v3 -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64_v3/x86_64_v3-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64_v3 -S $PWD
-          ninja -C build_x86_64_v3 llvm-clang
-
-      - name: Building i686 toolchain
-        if: ${{ steps.i686_cache.outputs.cache-matched-key == '' }}
-        run: |
-          cmake -DTARGET_ARCH=i686-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_i686/i686-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_i686 -S $PWD
-          ninja -C build_i686 llvm-clang
 
       - name: Building aarch64 toolchain
         if: ${{ steps.aarch64_cache.outputs.cache-matched-key == '' }}
@@ -139,14 +121,13 @@ jobs:
 
       - name: Cleanup
         run: |
-          rm -rf {build_i686,build_x86_64,build_x86_64_v3,build_aarch64}/{toolchain,packages} || true
+          rm -rf {build_x86_64,build_aarch64}/{toolchain,packages} || true
 
       - name: Collecting logs
         if: always()
         run: |
-          mkdir -p build_x86_64_logs build_i686_logs build_aarch64_logs
+          mkdir -p build_x86_64_logs build_aarch64_logs
           cp -fr $(find build_x86_64 -type f -iname "*-*.log") build_x86_64_logs || true
-          cp -fr $(find build_i686 -type f -iname "*-*.log") build_i686_logs || true
           cp -fr $(find build_aarch64 -type f -iname "*-*.log") build_aarch64_logs || true
           7z a -m0=lzma2 -mx=9 -ms=on logs.7z build*logs
 
@@ -156,68 +137,22 @@ jobs:
         with:
           name: logs
           path: logs.7z
-          retention-days: 1
-
-      - name: Uploading toolchain
-        uses: actions/upload-artifact@master
-        if: always()
-        with:
-          name: toolchain
-          path: clang_root
+          retention-days: 7
 
       - name: Saving clang root
         uses: actions/cache/save@main
         with:
           path: clang_root
-          key: ${{ secrets.CACHE_VERSION }}-clang_root-${{ github.run_id }}
+          key: ${{ inputs.cache_prefix }}-clang_root-${{ github.run_id }}
 
       - name: Saving x86_64 toolchain
         uses: actions/cache/save@main
         with:
           path: build_x86_64
-          key: ${{ secrets.CACHE_VERSION }}-clang-x86_64_toolchain-${{ github.run_id }}
-
-      - name: Saving x86_64_v3 toolchain
-        uses: actions/cache/save@main
-        with:
-          path: build_x86_64_v3
-          key: ${{ secrets.CACHE_VERSION }}-clang-x86_64_v3_toolchain-${{ github.run_id }}
-
-      - name: Saving i686 toolchain
-        uses: actions/cache/save@main
-        with:
-          path: build_i686
-          key: ${{ secrets.CACHE_VERSION }}-clang-i686_toolchain-${{ github.run_id }}
+          key: ${{ inputs.cache_prefix }}-clang-x86_64_toolchain-${{ github.run_id }}
 
       - name: Saving aarch64 toolchain
         uses: actions/cache/save@main
         with:
           path: build_aarch64
-          key: ${{ secrets.CACHE_VERSION }}-clang-aarch64_toolchain-${{ github.run_id }}
-
-      - name: Saving repository cache
-        if: false
-        uses: actions/cache/save@main
-        with:
-          path: src_packages
-          key: ${{ secrets.CACHE_VERSION }}-repository-${{ github.run_id }}
-
-  call_workflow:
-    name: Run mpv_clang
-    runs-on: ubuntu-latest
-    needs: build_llvm
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - name: Run mpv_clang.yml
-        run: |
-          curl -u shinchiro:$GH_TOKEN -X POST -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/shinchiro/mpv-winbuild-cmake/actions/workflows/mpv_clang.yml/dispatches -d @- <<EOF
-          {
-            "ref": "master",
-            "inputs": {
-              "sourceforge": "false",
-              "github_release": "false",
-              "mpv_tarball": "false"
-            }
-          }
-          EOF
+          key: ${{ inputs.cache_prefix }}-clang-aarch64_toolchain-${{ github.run_id }}
