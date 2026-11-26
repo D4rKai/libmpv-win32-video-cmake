@@ -1,5 +1,6 @@
 ExternalProject_Add(ogg
     GIT_REPOSITORY https://github.com/xiph/ogg.git
+    GIT_TAG 7cf42ea17aef7bc1b7b21af70724840a96c2e7d0
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

@@ -2,6 +2,7 @@ ExternalProject_Add(speex
     DEPENDS
         ogg 
     GIT_REPOSITORY https://github.com/xiph/speex.git
+    GIT_TAG aca6801183bad01458140dbbab71a68a02e5a561
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

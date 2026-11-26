@@ -1,8 +1,7 @@
 ExternalProject_Add(angle-headers
     GIT_REPOSITORY https://github.com/google/angle.git
     SOURCE_DIR ${SOURCE_LOCATION}
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    GIT_TAG c42ecd73af7a7c679bd19ad6d5a6bcbd8ba98b11
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone include/EGL include/KHR"
     GIT_SUBMODULES ""

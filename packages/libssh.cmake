@@ -3,6 +3,7 @@ ExternalProject_Add(libssh
         zlib
         openssl
     GIT_REPOSITORY https://gitlab.com/libssh/libssh-mirror.git
+    GIT_TAG 7712c7d0f97241c68e520d600b5857ebfcfd7439
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

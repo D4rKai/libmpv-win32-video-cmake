@@ -1,5 +1,6 @@
 ExternalProject_Add(libdvdcss
     GIT_REPOSITORY https://code.videolan.org/videolan/libdvdcss.git
+    GIT_TAG d0b6a291c24eda3727ad5c7a14956fc1fc82446d
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

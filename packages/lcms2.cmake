@@ -3,6 +3,7 @@ ExternalProject_Add(lcms2
         libjpeg
         zlib
     GIT_REPOSITORY https://github.com/mm2/Little-CMS.git
+    GIT_TAG 47a261e0b1579558184499ae5aadd0a04b1fb76f
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

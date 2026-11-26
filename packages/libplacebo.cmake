@@ -11,6 +11,7 @@ ExternalProject_Add(libplacebo
         libdovi
         xxhash
     GIT_REPOSITORY https://github.com/haasn/libplacebo.git
+    GIT_TAG 9e16c86f9a37af7fb207241150c2fe7ba50e3471
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     GIT_SUBMODULES ""

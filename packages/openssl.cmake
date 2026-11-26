@@ -4,6 +4,7 @@ ExternalProject_Add(openssl
         zstd
         brotli
     GIT_REPOSITORY https://github.com/openssl/openssl.git
+    GIT_TAG 1f0cb850473048eef5dc597d8cd42dd7c3cf5a5f
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !test"

@@ -5,8 +5,7 @@ ExternalProject_Add(llvm
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !*/test !/lldb !/mlir !/clang-tools-extra !/mlir !/polly !/libc !/flang"
     UPDATE_COMMAND ""
-    GIT_REMOTE_NAME origin
-    GIT_TAG release/19.x
+    GIT_TAG 7ba7d8e2f7b6445b60679da826210cdde29eaf8b
     LIST_SEPARATOR ,
     CONFIGURE_COMMAND ${EXEC} CONF=1 PATH=$O_PATH cmake -H<SOURCE_DIR>/llvm -B<BINARY_DIR>
         -G Ninja

@@ -1,5 +1,6 @@
 ExternalProject_Add(brotli
     GIT_REPOSITORY https://github.com/google/brotli.git
+    GIT_TAG 350100a5bb9d9671aca85213b2ec7a70a361b0cd
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !tests !js !java !research"

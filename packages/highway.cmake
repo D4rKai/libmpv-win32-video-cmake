@@ -4,6 +4,7 @@ endif()
 
 ExternalProject_Add(highway
     GIT_REPOSITORY https://github.com/google/highway.git
+    GIT_TAG 5f173286d46b7746de98a8bd642907e1bd25a02f
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

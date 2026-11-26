@@ -2,6 +2,7 @@ ExternalProject_Add(libsrt
     DEPENDS
         openssl
     GIT_REPOSITORY https://github.com/Haivision/srt.git
+    GIT_TAG c1803bba86c4af288931aa35b2a6233ac5eab657
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

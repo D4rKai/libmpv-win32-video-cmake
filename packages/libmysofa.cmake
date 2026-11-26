@@ -2,8 +2,7 @@ ExternalProject_Add(libmysofa
     DEPENDS zlib
     GIT_REPOSITORY https://github.com/hoene/libmysofa.git
     SOURCE_DIR ${SOURCE_LOCATION}
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    GIT_TAG 444d2c1d7ececf5cc2d96d3b17b209047b02318d
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !tests"
     UPDATE_COMMAND ""

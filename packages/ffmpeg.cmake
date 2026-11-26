@@ -33,6 +33,7 @@ ExternalProject_Add(ffmpeg
         dav1d
         openal-soft
     GIT_REPOSITORY https://github.com/FFmpeg/FFmpeg.git
+    GIT_TAG 8d940a07d19023a98689f353e4425a14688547e9
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !tests/ref/fate"

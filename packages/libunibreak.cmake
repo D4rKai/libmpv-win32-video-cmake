@@ -1,5 +1,6 @@
 ExternalProject_Add(libunibreak
     GIT_REPOSITORY https://github.com/adah1972/libunibreak.git
+    GIT_TAG ab77349700cc94b0093658edf5e87f5a54fe6652
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

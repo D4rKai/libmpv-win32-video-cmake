@@ -1,5 +1,6 @@
 ExternalProject_Add(uchardet
     GIT_REPOSITORY https://gitlab.freedesktop.org/uchardet/uchardet.git
+    GIT_TAG edae8e81cfb8092496f94da1a306c4c9f0ce32bb
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

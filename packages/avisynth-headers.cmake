@@ -1,5 +1,6 @@
 ExternalProject_Add(avisynth-headers
     GIT_REPOSITORY https://github.com/AviSynth/AviSynthPlus.git
+    GIT_TAG b2225100a27da3e110b546700394342bd2001ec5
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--sparse --filter=tree:0"
     GIT_CLONE_POST_COMMAND "sparse-checkout set --no-cone /* !distrib"

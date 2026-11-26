@@ -2,6 +2,7 @@ ExternalProject_Add(openal-soft
     DEPENDS
         libsdl2
     GIT_REPOSITORY https://github.com/kcat/openal-soft.git
+    GIT_TAG c2a15a0c7c5ec8dc774b110de1cbe54b26fe0c3f
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""

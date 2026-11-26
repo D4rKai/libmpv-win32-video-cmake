@@ -10,8 +10,7 @@ ExternalProject_Add(libjxl
     GIT_REPOSITORY https://github.com/libjxl/libjxl.git
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    GIT_TAG c6355600c5932e3a9f1b95a4cadfa9b718fbec8f
     GIT_SUBMODULES ""
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""

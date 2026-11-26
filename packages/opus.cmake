@@ -5,8 +5,7 @@ ExternalProject_Add(opus
     GIT_REPOSITORY https://github.com/xiph/opus.git
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
-    GIT_REMOTE_NAME origin
-    GIT_TAG main
+    GIT_TAG 7db26934e4156597cb0586bb4d2e44dccdde1a59
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
     COMMAND bash -c "cp ${src_opus_dnn}/*.h ${src_opus_dnn}/*.c <SOURCE_DIR>/dnn"

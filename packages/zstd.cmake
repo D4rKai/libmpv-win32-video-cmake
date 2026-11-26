@@ -3,8 +3,7 @@ ExternalProject_Add(zstd
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""
-    GIT_REMOTE_NAME origin
-    GIT_TAG dev
+    GIT_TAG b880f20d52a925ebee373b5050c206ba325d935d
     CONFIGURE_COMMAND ${EXEC} CONF=1 cmake -H<SOURCE_DIR>/build/cmake -B<BINARY_DIR>
         -G Ninja
         -DCMAKE_BUILD_TYPE=Release
