@@ -136,7 +136,9 @@ jobs:
           rm -rf check && mkdir check && 7z e -ocheck "$dev" libmpv-2.dll > /dev/null
           ls -l check/libmpv-2.dll
           for f in acompressor alimiter equalizer pan volume aresample aformat anull asplit amix highpass lowpass bandpass astats ametadata ebur128 silencedetect dynaudnorm; do
-            n=$(grep -a -c -w "$f" check/libmpv-2.dll || true)
+            # Occurrences, not whole words: the linker may tail-merge a name
+            # into a longer string (x86_64 does it to "ametadata").
+            n=$(grep -a -o "$f" check/libmpv-2.dll | wc -l)
             echo "$f $n"
             test "$n" -gt 0
           done
