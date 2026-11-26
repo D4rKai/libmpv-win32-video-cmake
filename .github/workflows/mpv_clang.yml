@@ -136,8 +136,9 @@ jobs:
           rm -rf check && mkdir check && 7z e -ocheck "$dev" libmpv-2.dll > /dev/null
           ls -l check/libmpv-2.dll
           for f in acompressor alimiter equalizer pan volume aresample aformat anull asplit amix highpass lowpass bandpass astats ametadata ebur128 silencedetect dynaudnorm; do
-            # Occurrences, not whole words: the linker may tail-merge a name
-            # into a longer string (x86_64 does it to "ametadata").
+            # Occurrences, not whole words: on x86_64 "ametadata" sits right
+            # after a constant whose last byte is 0x34, so grep -w sees
+            # "4ametadata" and finds no whole word.
             n=$(grep -a -o "$f" check/libmpv-2.dll | wc -l)
             echo "$f $n"
             test "$n" -gt 0
