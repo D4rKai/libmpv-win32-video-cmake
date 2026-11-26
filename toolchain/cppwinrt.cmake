@@ -1,5 +1,6 @@
 ExternalProject_Add(cppwinrt
     GIT_REPOSITORY https://github.com/microsoft/cppwinrt.git
+    GIT_TAG f9ec1986083a70d2f99d726b06b00a38cb2d1054
     SOURCE_DIR ${SOURCE_LOCATION}
     GIT_CLONE_FLAGS "--filter=tree:0"
     UPDATE_COMMAND ""
@@ -10,7 +11,7 @@ ExternalProject_Add(cppwinrt
         -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
     BUILD_COMMAND ${EXEC} ninja -C <BINARY_DIR>
     INSTALL_COMMAND ${EXEC} ninja -C <BINARY_DIR> install
-            COMMAND ${EXEC} wget -O <BINARY_DIR>/Windows.winmd  https://github.com/microsoft/windows-rs/raw/master/crates/libs/bindgen/default/Windows.winmd
+            COMMAND ${EXEC} wget -O <BINARY_DIR>/Windows.winmd  https://github.com/microsoft/windows-rs/raw/98ca5853f2f3eab2a39d6152f5eb278e756a45e1/crates/libs/bindgen/default/Windows.winmd
             COMMAND ${EXEC} cppwinrt -input <BINARY_DIR>/Windows.winmd -output ${MINGW_INSTALL_PREFIX}/include/
     LOG_DOWNLOAD 1 LOG_UPDATE 1 LOG_CONFIGURE 1 LOG_BUILD 1 LOG_INSTALL 1
 )
