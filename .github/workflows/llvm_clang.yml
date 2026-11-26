@@ -81,43 +81,56 @@ jobs:
         continue-on-error: true
         run: ${{ github.event.inputs.command }}
 
+      # Markers instead of cache hits, so a failed run resumes where it
+      # stopped (the caches below are saved even on failure).
+      - name: Checking state
+        id: state
+        run: |
+          for m in clang_root/.atlas-llvm-gen clang_root/.atlas-pgo build_x86_64/.atlas-toolchain build_aarch64/.atlas-toolchain; do
+            k=$(echo "$m" | tr '/.-' '___'); test -f "$m" && v=1 || v=0; echo "$k=$v" >> $GITHUB_OUTPUT; echo "$m $v"
+          done
+
       - name: Building LLVM with IR Profile Instrumentation
-        if: ${{ steps.clang_root_cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.state.outputs.clang_root__atlas_llvm_gen != '1' }}
         run: |
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64/x86_64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64 -S $PWD
           ninja -C build_x86_64 llvm
           ninja -C build_x86_64 rustup
           ninja -C build_x86_64 cargo-clean || true
+          touch clang_root/.atlas-llvm-gen
 
       - name: Building x86_64 toolchain
-        if: ${{ steps.x86_64_cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.state.outputs.build_x86_64__atlas_toolchain != '1' }}
         run: |
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64/x86_64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64 -S $PWD
           ninja -C build_x86_64 llvm-clang
+          touch build_x86_64/.atlas-toolchain
 
       - name: Building aarch64 toolchain
-        if: ${{ steps.aarch64_cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.state.outputs.build_aarch64__atlas_toolchain != '1' }}
         run: |
           cmake -DTARGET_ARCH=aarch64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_aarch64/aarch64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_aarch64 -S $PWD
           ninja -C build_aarch64 llvm-clang
+          touch build_aarch64/.atlas-toolchain
 
       - name: PGO training with shaderc
-        if: ${{ steps.clang_root_cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.state.outputs.clang_root__atlas_pgo != '1' }}
         run: |
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=GEN -DCLANG_PACKAGES_LTO=ON -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64/x86_64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64 -S $PWD
           ninja -C build_x86_64 shaderc
 
       - name: Merging profraw to profdata
-        if: ${{ steps.clang_root_cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.state.outputs.clang_root__atlas_pgo != '1' }}
         run: |
           llvm-profdata merge $PWD/clang_root/profiles/*.profraw -o llvm.profdata
           rm -rf $PWD/clang_root/profiles/* || true
 
       - name: Building LLVM with PGO
-        if: ${{ steps.clang_root_cache.outputs.cache-matched-key == '' }}
+        if: ${{ steps.state.outputs.clang_root__atlas_pgo != '1' }}
         run: |
           cmake -DTARGET_ARCH=x86_64-w64-mingw32 -DLLVM_ENABLE_PGO=USE -DLLVM_PROFDATA_FILE="llvm.profdata" -DCOMPILER_TOOLCHAIN=clang -DCMAKE_INSTALL_PREFIX=$PWD/clang_root -DMINGW_INSTALL_PREFIX=$PWD/build_x86_64/x86_64-w64-mingw32 -DSINGLE_SOURCE_LOCATION=$PWD/src_packages -DRUSTUP_LOCATION=$PWD/clang_root/install_rustup -G Ninja -B build_x86_64 -S $PWD
           ninja -C build_x86_64 llvm
+          touch clang_root/.atlas-pgo
 
       - name: Cleanup
         run: |
@@ -139,19 +152,28 @@ jobs:
           path: logs.7z
           retention-days: 7
 
+      - name: Dropping the LLVM build tree before saving
+        if: always()
+        run: |
+          rm -rf build_x86_64/toolchain/llvm-prefix/src/llvm-build build_aarch64/toolchain/llvm-prefix/src/llvm-build || true
+          du -sh clang_root build_x86_64 build_aarch64 2>/dev/null || true
+
       - name: Saving clang root
+        if: always()
         uses: actions/cache/save@main
         with:
           path: clang_root
           key: ${{ inputs.cache_prefix }}-clang_root-${{ github.run_id }}
 
       - name: Saving x86_64 toolchain
+        if: always()
         uses: actions/cache/save@main
         with:
           path: build_x86_64
           key: ${{ inputs.cache_prefix }}-clang-x86_64_toolchain-${{ github.run_id }}
 
       - name: Saving aarch64 toolchain
+        if: always()
         uses: actions/cache/save@main
         with:
           path: build_aarch64

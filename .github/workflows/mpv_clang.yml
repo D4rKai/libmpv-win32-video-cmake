@@ -121,6 +121,8 @@ jobs:
         run: |
           # No `ninja update`: every source is pinned (GIT_TAG <sha>) to the
           # commit the upstream 20241021 build used.
+          # The llvm toolchain workflow must have completed for this arch.
+          test -f clang_root/.atlas-pgo && test -f build_$BIT/.atlas-toolchain
           ninja -C build_$BIT llvm-copy-builtin
           ninja -C build_$BIT mpv
           test "$(git -C src_packages/mpv rev-parse HEAD)" = 0f7858451817c5fd5ebdb74a807a7c997662c390
