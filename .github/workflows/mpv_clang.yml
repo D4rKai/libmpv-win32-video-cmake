@@ -89,14 +89,10 @@ jobs:
           restore-keys: |
             ${{ inputs.cache_prefix }}-clang_root
 
-      - name: Loading repository cache
-        uses: actions/cache/restore@main
-        with:
-          path: src_packages
-          key: ${{ inputs.cache_prefix }}-repository-${{ matrix.bit }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ inputs.cache_prefix }}-repository-${{ matrix.bit }}
-
+      # Always the toolchain the llvm workflow finished, never a half-built
+      # package tree: pinned packages drop their stamps after install and
+      # their patches are already applied, so a resumed tree rebuilds them
+      # on top of patched sources. Every run builds the packages afresh.
       - name: Loading ${{ matrix.bit }} toolchain cache
         uses: actions/cache/restore@main
         with:
@@ -180,21 +176,6 @@ jobs:
         if: always()
         run: |
           ninja -C build_$BIT cargo-clean || true
-
-      - name: Saving repository cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: src_packages
-          key: ${{ inputs.cache_prefix }}-repository-${{ matrix.bit }}-${{ github.run_id }}
-
-      - name: Saving ${{ matrix.bit }} toolchain cache
-        uses: actions/cache/save@main
-        if: always()
-        with:
-          path: |
-            build_${{ matrix.bit }}
-          key: ${{ inputs.cache_prefix }}-clang-${{ matrix.bit }}_toolchain-${{ github.run_id }}
 
       - name: Saving release_${{ matrix.bit }} cache
         uses: actions/cache/save@main
