@@ -76,6 +76,15 @@ jobs:
           key: ${{ inputs.cache_prefix }}-clang-aarch64_toolchain-${{ github.run_id }}
           restore-keys: ${{ inputs.cache_prefix }}-clang-aarch64_toolchain
 
+      # Source of an LLVM build that failed half-way (its build tree is in
+      # the x86_64 toolchain cache), so the next run resumes it.
+      - name: Loading unfinished LLVM source
+        uses: actions/cache/restore@main
+        with:
+          path: src_packages/llvm
+          key: ${{ inputs.cache_prefix }}-llvm-src-${{ github.run_id }}
+          restore-keys: ${{ inputs.cache_prefix }}-llvm-src
+
       - name: Running custom command
         if: ${{ github.event.inputs.command != '' }}
         continue-on-error: true
@@ -152,11 +161,16 @@ jobs:
           path: logs.7z
           retention-days: 7
 
-      - name: Dropping the LLVM build tree before saving
+      - name: Cache sizes
         if: always()
-        run: |
-          rm -rf build_x86_64/toolchain/llvm-prefix/src/llvm-build build_aarch64/toolchain/llvm-prefix/src/llvm-build || true
-          du -sh clang_root build_x86_64 build_aarch64 2>/dev/null || true
+        run: du -sh clang_root build_x86_64 build_aarch64 src_packages/llvm 2>/dev/null || true
+
+      - name: Saving unfinished LLVM source
+        if: failure()
+        uses: actions/cache/save@main
+        with:
+          path: src_packages/llvm
+          key: ${{ inputs.cache_prefix }}-llvm-src-${{ github.run_id }}
 
       - name: Saving clang root
         if: always()
