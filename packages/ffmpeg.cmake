@@ -272,6 +272,24 @@ ExternalProject_Add(ffmpeg
 
         --enable-filter=overlay
         --enable-filter=equalizer
+        # ATLAS PRO ONE: LGPL audio filters for mpv af=lavfi=[...] (sound shaping)
+        --enable-filter=acompressor
+        --enable-filter=alimiter
+        --enable-filter=pan
+        --enable-filter=volume
+        --enable-filter=aresample
+        --enable-filter=aformat
+        --enable-filter=anull
+        --enable-filter=asplit
+        --enable-filter=amix
+        --enable-filter=highpass
+        --enable-filter=lowpass
+        --enable-filter=bandpass
+        --enable-filter=astats
+        --enable-filter=ametadata
+        --enable-filter=ebur128
+        --enable-filter=silencedetect
+        --enable-filter=dynaudnorm
 
         --enable-protocol=async
         --enable-protocol=cache
