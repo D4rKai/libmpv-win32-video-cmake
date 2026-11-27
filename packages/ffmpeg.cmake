@@ -183,6 +183,16 @@ ExternalProject_Add(ffmpeg
         --enable-decoder=vplayer
         --enable-decoder=webvtt
         --enable-decoder=movtext
+        # ATLAS PRO ONE (af2): picture and text subtitle decoders (LGPL)
+        --enable-decoder=pgssub
+        --enable-decoder=xsub
+        --enable-decoder=microdvd
+        --enable-decoder=mpl2
+        --enable-decoder=sami
+        --enable-decoder=realtext
+        --enable-decoder=jacosub
+        --enable-decoder=pjs
+        --enable-decoder=ccaption
 
         --enable-decoder=mjpeg
         --enable-decoder=ljpeg
@@ -252,6 +262,9 @@ ExternalProject_Add(ffmpeg
         --enable-demuxer=subviewer
         --enable-demuxer=subviewer1
         --enable-demuxer=vplayer
+        # ATLAS PRO ONE (af2): PGS .sup and VobSub .idx/.sub files
+        --enable-demuxer=sup
+        --enable-demuxer=vobsub
 
         --enable-parser=h263
         --enable-parser=h264
@@ -269,6 +282,9 @@ ExternalProject_Add(ffmpeg
         --enable-parser=tak
         --enable-parser=vorbis
         --enable-parser=dca
+        # ATLAS PRO ONE (af2): DVB and DVD subtitle parsers
+        --enable-parser=dvbsub
+        --enable-parser=dvdsub
 
         --enable-filter=overlay
         --enable-filter=equalizer

@@ -130,7 +130,7 @@ jobs:
           ninja -C build_$BIT mpv-packaging; mv build_$BIT/mpv*.7z release_$BIT
           if [[ $BIT == x86_64_v3 ]]; then for dir in release_$BIT/mpv-*; do name=$(basename $dir); mv $dir $(dirname $dir)/${name/x86_64/x86_64-v3}; done; fi
 
-      - name: Checking audio filters in libmpv-2.dll
+      - name: Checking audio filters and subtitle decoders in libmpv-2.dll
         run: |
           dev=$(ls release_$BIT/mpv-dev-${{ env.arch }}-*.7z)
           rm -rf check && mkdir check && 7z e -ocheck "$dev" libmpv-2.dll > /dev/null
@@ -141,6 +141,11 @@ jobs:
             # "4ametadata" and finds no whole word.
             n=$(grep -a -o "$f" check/libmpv-2.dll | wc -l)
             echo "$f $n"
+            test "$n" -gt 0
+          done
+          for d in pgssub dvdsub dvbsub xsub webvtt mov_text ass ssa text microdvd mpl2 sami realtext subviewer subviewer1 jacosub pjs vplayer stl cc_dec vobsub; do
+            n=$(grep -a -o "$d" check/libmpv-2.dll | wc -l)
+            echo "decoder/demuxer $d $n"
             test "$n" -gt 0
           done
           sha256sum release_$BIT/*.7z
@@ -225,8 +230,11 @@ jobs:
           media-kit libmpv-win32-video-cmake 20241021 rebuilt with the LGPL audio filters
           (acompressor, alimiter, equalizer, pan, volume, aresample, aformat, anull, asplit,
           amix, highpass, lowpass, bandpass, astats, ametadata, ebur128, silencedetect,
-          dynaudnorm). Same mpv (0f78584) and FFmpeg (8d940a07d) as 20241021, every other
-          source pinned to its 2024-10-21 commit; no --enable-gpl, no --enable-nonfree.
+          dynaudnorm) and, from af2, the subtitle decoders pgssub, xsub, microdvd, mpl2,
+          sami, realtext, jacosub, pjs and ccaption (cc_dec) next to the existing ones, the
+          sup and vobsub demuxers and the dvbsub/dvdsub parsers. Same mpv (0f78584) and
+          FFmpeg (8d940a07d) as 20241021, every other source pinned to its 2024-10-21
+          commit; no --enable-gpl, no --enable-nonfree.
 
           **Workflow run**: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
           END
